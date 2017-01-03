@@ -3,15 +3,24 @@ import pandas
 import urllib.request
 import numpy as np
 
-def trainAndTest(data, testPercentage=0.1):
-	'''
+Data = "Data/abalone.data"
+
+def trainAndTest(data, testPercentage):
+	"""
 	Shuffles the data and separates in two datasets
-	'''
+	"""
 	permutation = np.random.permutation(data.index)
 	indice = int(testPercentage*len(permutation))
 	train = data.ix[permutation[indice:]]
 	test = data.ix[permutation[:indice]]
 	return train, test
+
+def binarization(labels, value):
+	"""
+	Changes the labels by checking if they are greater or lower than a given value
+	"""
+	return labels.apply(lambda x : -1 if x != value else 1)
+
 
 def download(url, fileName, saveDirectory):
 	"""
@@ -27,7 +36,7 @@ def download(url, fileName, saveDirectory):
 	else :
 		print("Data already downloaded")
 
-def abalone(testPercentage = 0.1, dataset = "Data/abalone.data"):
+def abalone(testPercentage, dataset = "Data/abalone.data"):
 	"""
 	Reads the abalone dataset and returns train and test subdatasets
 	"""
@@ -35,8 +44,10 @@ def abalone(testPercentage = 0.1, dataset = "Data/abalone.data"):
 	mapping = {'M':-1, 'F':1, 'I':0}
 	data = data.replace({data.columns[0]:mapping})
 
-	return trainAndTest(data, testPercentage)
+	train, test = trainAndTest(data, testPercentage)
+	features = list(range(0,len(data.columns)-2))
 
+	return train[features], train.iloc[:,-1], test[features], test.iloc[:,-1]
 
 if __name__ == '__main__':
 	print("Download")
