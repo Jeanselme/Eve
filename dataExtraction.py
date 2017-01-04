@@ -3,8 +3,6 @@ import pandas
 import urllib.request
 import numpy as np
 
-Data = "Data/abalone.data"
-
 def trainAndTest(data, testPercentage):
 	"""
 	Shuffles the data and separates in two datasets
@@ -49,6 +47,20 @@ def abalone(testPercentage, dataset = "Data/abalone.data"):
 
 	return train[features], train.iloc[:,-1], test[features], test.iloc[:,-1]
 
+def ionosphere(testPercentage, dataset = "Data/ionosphere.data"):
+	"""
+	Reads the ionosphere dataset and returns train and test subdatasets
+	"""
+	data = pandas.read_csv(dataset, header=None)
+	mapping = {'g':-1, 'b':1}
+	data = data.replace({data.columns[len(data.columns)-1]:mapping})
+
+	train, test = trainAndTest(data, testPercentage)
+	features = list(range(0,len(data.columns)-2))
+
+	return train[features], train.iloc[:,-1], test[features], test.iloc[:,-1]
+
 if __name__ == '__main__':
 	print("Download")
 	download("https://archive.ics.uci.edu/ml/machine-learning-databases/abalone/", "abalone.data", "Data/")
+	download("https://archive.ics.uci.edu/ml/machine-learning-databases/ionosphere/", "ionosphere.data", "Data/")
