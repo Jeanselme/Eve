@@ -12,10 +12,15 @@ To download data (at the first use), execute :
 python3.5 dataExtraction.py
 ```
 
+To compute a comparison of the different algorithm, execute :  
+```
+python3.5 performances.py
+```
+
+All the needed algorithm are present in the gradientDescent.py file.
+
 ## Results
-We compute the comparison on the dataset : [Abalone Data Set](https://archive.ics.uci.edu/ml/datasets/Abalone). The goal is to predict the age of abalone from physical measurements.  
-
-
+We compute the comparison on the dataset : [Ionosphere Data Set](http://archive.ics.uci.edu/ml/datasets/Ionosphere). The goal is to predict the class of the radar.  
 
 ## Libraries
 Needs numpy, scipy and sys. Compiled with python3.5
