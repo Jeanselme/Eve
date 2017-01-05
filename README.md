@@ -3,7 +3,8 @@ Compare gradient descent algorithm to Eve.
 
 ## References
 
-### Article
+### Articles
+Adam algorithm is based on the article : [Adam : A Method For Stochastic Optimization](https://arxiv.org/pdf/1412.6980v8.pdf) by Diederik P. Kingma and Jimmy Lei Ba.  
 Eve algorithm is based on the article : [Improving Stochastic Gradient Descent With Feedback](https://arxiv.org/pdf/1611.01505v2.pdf) by Jayanth Koushik & Hiroaki Hayashi.
 
 ## Execution
@@ -22,5 +23,11 @@ All the needed algorithm are present in the gradientDescent.py file.
 ## Results
 We compute the comparison on the dataset : [Ionosphere Data Set](http://archive.ics.uci.edu/ml/datasets/Ionosphere). The goal is to predict the class of the radar.  
 
+Error after 500 iterations :  
+![Result](https://raw.githubusercontent.com/Jeanselme/Eve/master/Images/Results.png)
+
+This Figure shows the imporvement implied by Adam algorithm which has an impressive error decrease. Moreover, it highlights the adavantage of an auto adaptative learning rate on training error.  
+However, this shows that overfitting is emphasized by the auto adaptative learning rate.
+
 ## Libraries
-Needs numpy, scipy and sys. Compiled with python3.5
+Needs numpy, os, pandas and urllib.request. Executed with python3.5 on Linux
