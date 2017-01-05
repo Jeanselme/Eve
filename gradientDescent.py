@@ -24,7 +24,6 @@ def gradientDescent(train, trainLabels, test, testLabels,
 	lossesTrain = []
 	weight = np.zeros(len(train.columns))
 	for i in range(maxIter):
-		print("Iteration : {} / {}".format(i+1, maxIter))
 		loss = 0
 		grad = np.zeros(weight.shape)
 
@@ -33,9 +32,11 @@ def gradientDescent(train, trainLabels, test, testLabels,
 			loss += logisticLoss(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
 
 		weight -= learningRate*(grad + regularization*weight)
-		print("\t-> Train Loss : {}".format(loss))
+
 
 		if (i % testTime == 0):
+			print("Iteration : {} / {}".format(i+1, maxIter))
+			print("\t-> Train Loss : {}".format(loss))
 			lossesTrain.append(loss)
 			loss = 0
 			for j in range(len(test)):
@@ -95,15 +96,12 @@ def adamGradientDescent(train, trainLabels, test, testLabels,
 	for i in range(maxIter):
 		b1t *= b1
 		b2t *= b2
-		print("Iteration : {} / {}".format(i+1, maxIter))
 		loss = 0
 		grad = np.zeros(weight.shape)
 
 		for j in range(len(train)):
 			grad += logisticGrad(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
 			loss += logisticLoss(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
-
-		print("\t-> Train Loss : {}".format(loss))
 
 		m = b1*m + (1-b1)*grad
 		mh = m / (1-b1t)
@@ -114,6 +112,8 @@ def adamGradientDescent(train, trainLabels, test, testLabels,
 		weight -= learningRate*(np.multiply(mh,1/(np.sqrt(vh) + epsilon)) + regularization*weight)
 
 		if (i % testTime == 0):
+			print("Iteration : {} / {}".format(i+1, maxIter))
+			print("\t-> Train Loss : {}".format(loss))
 			lossesTrain.append(loss)
 			loss = 0
 			for j in range(len(test)):
@@ -144,15 +144,12 @@ def eveGradientDescent(train, trainLabels, test, testLabels,
 	for i in range(maxIter):
 		b1t *= b1
 		b2t *= b2
-		print("Iteration : {} / {}".format(i+1, maxIter))
 		loss = 0
 		grad = np.zeros(weight.shape)
 
 		for j in range(len(train)):
 			grad += logisticGrad(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
 			loss += logisticLoss(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
-
-		print("\t-> Train Loss : {}".format(loss))
 
 		m = b1*m + (1-b1)*grad
 		mh = m / (1-b1t)
@@ -179,6 +176,8 @@ def eveGradientDescent(train, trainLabels, test, testLabels,
 
 
 		if (i % testTime == 0):
+			print("Iteration : {} / {}".format(i+1, maxIter))
+			print("\t-> Train Loss : {}".format(loss))
 			lossesTrain.append(loss)
 			loss = 0
 			for j in range(len(test)):
