@@ -76,6 +76,53 @@ def stochasticGradientDescent(train, trainLabels, test, testLabels,
 
 	return weight, lossesTrain, lossesTest
 
+def adamGradientDescent(train, trainLabels, test, testLabels,
+	maxIter = 10, learningRate = 0.001, testTime = 2,
+	b1 = 0.9, b2 = 0.999, b3 = 0.999, epsilon = 10**(-8), k = 0.1, K = 10):
+	"""
+	Computes the gradient descent in order to predict labels thanks to the eve algorithm
+	-> Binary classification
+	"""
+	lossesTest = []
+	lossesTrain = []
+	weight = np.zeros(len(train.columns))
+
+	m = np.zeros(weight.shape)
+	v = np.zeros(weight.shape)
+	b1t = 1
+	b2t = 1
+
+	for i in range(maxIter):
+		b1t *= b1
+		b2t *= b2
+		print("Iteration : {} / {}".format(i+1, maxIter))
+		loss = 0
+		grad = np.zeros(weight.shape)
+
+		for j in range(len(train)):
+			grad += logisticGrad(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
+			loss += logisticLoss(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
+
+		print("\t-> Train Loss : {}".format(loss))
+
+		m = b1*m + (1-b1)*grad
+		mh = m / (1-b1t)
+
+		v = b2*v + (1-b2)*np.multiply(grad,grad)
+		vh = v/(1-b2t)
+
+		weight -= learningRate*np.multiply(mh,1/(np.sqrt(vh) + epsilon))
+
+		if (i % testTime == 0):
+			lossesTrain.append(loss)
+			loss = 0
+			for j in range(len(test)):
+				loss += logisticLoss(test.iloc[j], testLabels.iloc[j], weight)/len(test)
+			lossesTest.append(loss)
+			print("\t-> Test Loss : {}".format(loss))
+
+	return weight, lossesTrain, lossesTest
+
 def eveGradientDescent(train, trainLabels, test, testLabels,
 	maxIter = 10, learningRate = 0.001, testTime = 2,
 	b1 = 0.9, b2 = 0.999, b3 = 0.999, epsilon = 10**(-8), k = 0.1, K = 10):
