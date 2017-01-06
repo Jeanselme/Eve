@@ -41,15 +41,17 @@ def gradientDescent(train, trainLabels, test, testLabels,
 
 		for j in range(len(train)):
 			grad += logisticGrad(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
-			loss += logisticLoss(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
 
 		weight -= learningRate*(grad + regularization*weight)
 
-
 		if (i % testTime == 0):
 			print("Iteration : {} / {}".format(i+1, maxIter))
-			print("\t-> Train Loss : {}".format(loss))
+			loss = 0
+			for j in range(len(train)):
+				loss += logisticLoss(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
 			lossesTrain.append(loss)
+			print("\t-> Train Loss : {}".format(loss))
+
 			loss = 0
 			for j in range(len(test)):
 				loss += logisticLoss(test.iloc[j], testLabels.iloc[j], weight)/len(test)
@@ -70,7 +72,6 @@ def stochasticGradientDescent(train, trainLabels, test, testLabels,
 	for i in range(maxIter * len(train)):
 		j = rand.randint(len(train))
 		grad = logisticGrad(train.iloc[j], trainLabels.iloc[j], weight)
-
 		weight -= learningRate*(grad + regularization*weight)/len(train)
 
 		if (i % (testTime*len(train)) == 0):
@@ -111,15 +112,17 @@ def batchGradientDescent(train, trainLabels, test, testLabels,
 		for batch in range(int(len(train)/batchSize)):
 			for j in range(batch*batchSize, (batch+1)*batchSize):
 				grad += logisticGrad(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
-				loss += logisticLoss(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
 
-			weight -= learningRate*(grad + regularization*weight/(len(train)*batchSizePercentage))
-
+			weight -= learningRate*(grad + regularization*weight/batchSize)
 
 		if (i % testTime == 0):
 			print("Iteration : {} / {}".format(i+1, maxIter))
-			print("\t-> Train Loss : {}".format(loss))
+			loss = 0
+			for j in range(len(train)):
+				loss += logisticLoss(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
 			lossesTrain.append(loss)
+			print("\t-> Train Loss : {}".format(loss))
+
 			loss = 0
 			for j in range(len(test)):
 				loss += logisticLoss(test.iloc[j], testLabels.iloc[j], weight)/len(test)
@@ -156,7 +159,6 @@ def adamGradientDescent(train, trainLabels, test, testLabels,
 
 		for j in range(len(train)):
 			grad += logisticGrad(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
-			loss += logisticLoss(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
 
 		m = b1*m + (1-b1)*grad
 		mh = m / (1-b1t)
@@ -168,8 +170,12 @@ def adamGradientDescent(train, trainLabels, test, testLabels,
 
 		if (i % testTime == 0):
 			print("Iteration : {} / {}".format(i+1, maxIter))
-			print("\t-> Train Loss : {}".format(loss))
+			loss = 0
+			for j in range(len(train)):
+				loss += logisticLoss(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
 			lossesTrain.append(loss)
+			print("\t-> Train Loss : {}".format(loss))
+
 			loss = 0
 			for j in range(len(test)):
 				loss += logisticLoss(test.iloc[j], testLabels.iloc[j], weight)/len(test)
