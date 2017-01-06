@@ -13,7 +13,7 @@ To download data (at the first use), execute :
 python3.5 dataExtraction.py
 ```
 
-To compute a comparison of the different algorithm, execute :  
+To compute a comparison of the different algorithms, execute :  
 ```
 python3.5 performances.py
 ```
@@ -23,11 +23,12 @@ All the needed algorithm are present in the gradientDescent.py file.
 ## Results
 We compute the comparison on the dataset : [Ionosphere Data Set](http://archive.ics.uci.edu/ml/datasets/Ionosphere). The goal is to predict the class of the radar.  
 
-Error after 500 iterations :  
-![Result](https://raw.githubusercontent.com/Jeanselme/Eve/master/Images/Results.png)
+Error after 1000 iterations :  
+![Results](https://raw.githubusercontent.com/Jeanselme/Eve/master/Images/Results.png)
 
 This Figure shows the imporvement implied by Adam algorithm which has an impressive error decrease. Moreover, it highlights the adavantage of an auto adaptative learning rate on training error.  
-However, this shows that overfitting is emphasized by the auto adaptative learning rate.
+
+Moreover, the data are shuffled at the beginning of each iteration, that has a huge benefit on the total error.
 
 ## Libraries
 Needs numpy, os, pandas and urllib.request. Executed with python3.5 on Linux
