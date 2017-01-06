@@ -89,6 +89,45 @@ def stochasticGradientDescent(train, trainLabels, test, testLabels,
 
 	return weight, lossesTrain, lossesTest
 
+
+def batchGradientDescent(train, trainLabels, test, testLabels,
+	maxIter = 10, learningRate = 0.001, regularization = 0.01,
+	batchSizePercentage = 0.1, shuffled = True, testTime = 2):
+	"""
+	Computes the gradient descent in order to predict the labels, updates after a batch
+	-> Binary classification by logistic regression
+	"""
+	batchSize = int(len(train)*batchSizePercentage)
+	lossesTest = []
+	lossesTrain = []
+	weight = np.zeros(len(train.columns))
+	for i in range(maxIter):
+		loss = 0
+		grad = np.zeros(weight.shape)
+
+		if shuffled:
+			train, trainLabels = shuffle(train, trainLabels)
+
+		for batch in range(int(len(train)/batchSize)):
+			for j in range(batch*batchSize, (batch+1)*batchSize):
+				grad += logisticGrad(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
+				loss += logisticLoss(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
+
+			weight -= learningRate*(grad + regularization*weight/(len(train)*batchSizePercentage))
+
+
+		if (i % testTime == 0):
+			print("Iteration : {} / {}".format(i+1, maxIter))
+			print("\t-> Train Loss : {}".format(loss))
+			lossesTrain.append(loss)
+			loss = 0
+			for j in range(len(test)):
+				loss += logisticLoss(test.iloc[j], testLabels.iloc[j], weight)/len(test)
+			lossesTest.append(loss)
+			print("\t-> Test Loss : {}".format(loss))
+
+	return weight, lossesTrain, lossesTest
+
 def adamGradientDescent(train, trainLabels, test, testLabels,
 	maxIter = 10, learningRate = 0.001, regularization = 0.01,
 	shuffled = True, testTime = 2,
