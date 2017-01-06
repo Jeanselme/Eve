@@ -1,5 +1,13 @@
+import pandas as pd
 import numpy as np
 import numpy.random as rand
+
+def shuffle(data, label):
+	"""
+	Shuffles the data and associated labels
+	"""
+	permutation = np.random.permutation(data.index)
+	return data.ix[permutation], label.ix[permutation]
 
 def logisticLoss(features, label, weight):
 	"""
@@ -15,7 +23,8 @@ def logisticGrad(features, label, weight):
 	return np.multiply(features,-label/denum)
 
 def gradientDescent(train, trainLabels, test, testLabels,
-	maxIter = 10, learningRate = 0.001, regularization = 0.01, testTime = 2):
+	maxIter = 10, learningRate = 0.001, regularization = 0.01,
+	shuffled = True, testTime = 2):
 	"""
 	Computes the gradient descent in order to predict the labels
 	-> Binary classification by logistic regression
@@ -26,6 +35,9 @@ def gradientDescent(train, trainLabels, test, testLabels,
 	for i in range(maxIter):
 		loss = 0
 		grad = np.zeros(weight.shape)
+
+		if shuffled:
+			train, trainLabels = shuffle(train, trainLabels)
 
 		for j in range(len(train)):
 			grad += logisticGrad(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
@@ -57,9 +69,9 @@ def stochasticGradientDescent(train, trainLabels, test, testLabels,
 	weight = np.zeros(len(train.columns))
 	for i in range(maxIter * len(train)):
 		j = rand.randint(len(train))
-		grad = logisticGrad(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
+		grad = logisticGrad(train.iloc[j], trainLabels.iloc[j], weight)
 
-		weight -= learningRate*(grad + regularization*weight)
+		weight -= learningRate*(grad + regularization*weight)/len(train)
 
 		if (i % (testTime*len(train)) == 0):
 			print("Iteration : {} / {}".format(i+1, maxIter*len(train)))
@@ -78,7 +90,8 @@ def stochasticGradientDescent(train, trainLabels, test, testLabels,
 	return weight, lossesTrain, lossesTest
 
 def adamGradientDescent(train, trainLabels, test, testLabels,
-	maxIter = 10, learningRate = 0.001, regularization = 0.01, testTime = 2,
+	maxIter = 10, learningRate = 0.001, regularization = 0.01,
+	shuffled = True, testTime = 2,
 	b1 = 0.9, b2 = 0.999, b3 = 0.999, epsilon = 10**(-8), k = 0.1, K = 10):
 	"""
 	Computes the gradient descent in order to predict labels thanks to the eve algorithm
@@ -98,6 +111,9 @@ def adamGradientDescent(train, trainLabels, test, testLabels,
 		b2t *= b2
 		loss = 0
 		grad = np.zeros(weight.shape)
+
+		if shuffled:
+			train, trainLabels = shuffle(train, trainLabels)
 
 		for j in range(len(train)):
 			grad += logisticGrad(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
@@ -124,7 +140,8 @@ def adamGradientDescent(train, trainLabels, test, testLabels,
 	return weight, lossesTrain, lossesTest
 
 def eveGradientDescent(train, trainLabels, test, testLabels,
-	maxIter = 10, learningRate = 0.001, regularization = 0.01, testTime = 2,
+	maxIter = 10, learningRate = 0.001, regularization = 0.01,
+	shuffled = True, testTime = 2,
 	b1 = 0.9, b2 = 0.999, b3 = 0.999, epsilon = 10**(-8), k = 0.1, K = 10):
 	"""
 	Computes the gradient descent in order to predict labels thanks to the eve algorithm
@@ -146,6 +163,9 @@ def eveGradientDescent(train, trainLabels, test, testLabels,
 		b2t *= b2
 		loss = 0
 		grad = np.zeros(weight.shape)
+
+		if shuffled:
+			train, trainLabels = shuffle(train, trainLabels)
 
 		for j in range(len(train)):
 			grad += logisticGrad(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
