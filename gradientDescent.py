@@ -151,7 +151,7 @@ def batchGradientDescent(train, trainLabels, test, testLabels,
 def adamGradientDescent(train, trainLabels, test, testLabels,
 	maxIter = 10, learningRate = 0.001, regularization = 0.01,
 	shuffled = True, testTime = 2,
-	b1 = 0.9, b2 = 0.999, b3 = 0.999, epsilon = 10**(-8), k = 0.1, K = 10):
+	b1 = 0.9, b2 = 0.999, epsilon = 10**(-8)):
 	"""
 	Computes the gradient descent in order to predict labels thanks to the eve algorithm
 	-> Binary classification
@@ -290,7 +290,7 @@ def eveGradientDescent(train, trainLabels, test, testLabels,
 def adamBatchGradientDescent(train, trainLabels, test, testLabels,
 	maxIter = 10, learningRate = 0.001, regularization = 0.01,
 	batchSizePercentage = 0.1, shuffled = True, testTime = 2,
-	b1 = 0.9, b2 = 0.999, b3 = 0.999, epsilon = 10**(-8), k = 0.1, K = 10):
+	b1 = 0.9, b2 = 0.999, epsilon = 10**(-8)):
 	"""
 	Computes the gradient descent in order to predict labels thanks to the eve algorithm
 	-> Binary classification
