@@ -36,14 +36,18 @@ def gradientDescent(train, trainLabels, test, testLabels,
 		loss = 0
 		grad = np.zeros(weight.shape)
 
+		# Shuffles the data in order to improve the learning
 		if shuffled:
 			train, trainLabels = shuffle(train, trainLabels)
 
+		# Computes the gradient on all the training data
 		for j in range(len(train)):
 			grad += logisticGrad(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
 
+		# Updates the weight with a regularizer in order to avoid overfitting
 		weight -= learningRate*(grad + regularization*weight)
 
+		# Computes the error on the training and testing sets
 		if (i % testTime == 0):
 			print("Iteration : {} / {}".format(i+1, maxIter))
 			loss = 0
@@ -69,11 +73,19 @@ def stochasticGradientDescent(train, trainLabels, test, testLabels,
 	lossesTest = []
 	lossesTrain = []
 	weight = np.zeros(len(train.columns))
+
+	# Multiplication is only for an easier comparison with other algorithms
 	for i in range(maxIter * len(train)):
+		# Takes a random sample
 		j = rand.randint(len(train))
+
+		# Computes the local direction
 		grad = logisticGrad(train.iloc[j], trainLabels.iloc[j], weight)
+
+		# Updates the weight
 		weight -= learningRate*(grad + regularization*weight)/len(train)
 
+		# Computes the error on the training and testing sets
 		if (i % (testTime*len(train)) == 0):
 			print("Iteration : {} / {}".format(i+1, maxIter*len(train)))
 			loss = 0
@@ -104,18 +116,22 @@ def batchGradientDescent(train, trainLabels, test, testLabels,
 	lossesTrain = []
 	weight = np.zeros(len(train.columns))
 	for i in range(maxIter):
-		loss = 0
 		grad = np.zeros(weight.shape)
 
+		# Shuffles the data in order to improve the learning
 		if shuffled:
 			train, trainLabels = shuffle(train, trainLabels)
 
+		# A batch is a subset of the total training set
 		for batch in range(numberOfBatch):
 			for j in range(batch*batchSize, (batch+1)*batchSize):
 				grad += logisticGrad(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
 
+			# Updates the weight with the subset direction
+			# Division is in order to compute the same gradient than gradient descent at the end
 			weight -= learningRate*(grad + regularization*weight/numberOfBatch)
 
+		# Computes the error on the training and testing sets
 		if (i % testTime == 0):
 			print("Iteration : {} / {}".format(i+1, maxIter))
 			loss = 0
@@ -144,8 +160,10 @@ def adamGradientDescent(train, trainLabels, test, testLabels,
 	lossesTrain = []
 	weight = np.zeros(len(train.columns))
 
-	m = np.zeros(weight.shape)
-	v = np.zeros(weight.shape)
+	# Moving averages
+	m = np.zeros(weight.shape) # Mean
+	v = np.zeros(weight.shape) # Variance
+	# To compute the moving average
 	b1t = 1
 	b2t = 1
 
@@ -154,20 +172,25 @@ def adamGradientDescent(train, trainLabels, test, testLabels,
 		b2t *= b2
 		grad = np.zeros(weight.shape)
 
+		# Shuffles the data in order to improve the learning
 		if shuffled:
 			train, trainLabels = shuffle(train, trainLabels)
 
+		# Computes the full gradient
 		for j in range(len(train)):
 			grad += logisticGrad(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
 
+		# Updates the moving averages
 		m = b1*m + (1-b1)*grad
 		mh = m / (1-b1t)
 
 		v = b2*v + (1-b2)*np.multiply(grad,grad)
 		vh = v/(1-b2t)
 
+		# Updates the weight with the normalized gradient
 		weight -= learningRate*(np.multiply(mh,1/(np.sqrt(vh) + epsilon)) + regularization*weight)
 
+		# Computes the error on the training and testing sets
 		if (i % testTime == 0):
 			print("Iteration : {} / {}".format(i+1, maxIter))
 			loss = 0
@@ -196,12 +219,16 @@ def eveGradientDescent(train, trainLabels, test, testLabels,
 	lossesTrain = []
 	weight = np.zeros(len(train.columns))
 
+	# Moving averages
 	m = np.zeros(weight.shape)
 	v = np.zeros(weight.shape)
-	d = 1
-	oldLoss = 0
+	# To compute them
 	b1t = 1
 	b2t = 1
+	# Adaptative learning rate
+	d = 1
+	# Loss of the last epoch
+	oldLoss = 0
 
 	for i in range(maxIter):
 		b1t *= b1
@@ -209,20 +236,25 @@ def eveGradientDescent(train, trainLabels, test, testLabels,
 		loss = 0
 		grad = np.zeros(weight.shape)
 
+		# Shuffles the data in order to improve the learning
 		if shuffled:
 			train, trainLabels = shuffle(train, trainLabels)
 
+		# Computes the full gradient and error
 		for j in range(len(train)):
 			grad += logisticGrad(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
 			loss += logisticLoss(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
 
+		# Updates the moving averages
 		m = b1*m + (1-b1)*grad
 		mh = m / (1-b1t)
 
 		v = b2*v + (1-b2)*np.multiply(grad,grad)
 		vh = v/(1-b2t)
 
+		# Updates the adaptative learning rate
 		if (i > 0):
+			# In order to bound the learning rate
 			if loss < oldLoss:
 				delta = k + 1
 				Delta = K + 1
@@ -232,14 +264,17 @@ def eveGradientDescent(train, trainLabels, test, testLabels,
 			c = min(max(delta, loss/oldLoss), Delta)
 			oldLossS = oldLoss
 			oldLoss = c*oldLoss
+			# Computes the feedback of the error function (normalized)
 			r = abs(oldLoss - oldLossS)/(min(oldLoss,oldLossS))
+			# Updates the correction of learning rate
 			d = b3*d + (1-b3)*r
 		else:
 			oldLoss = loss
 
+		# Updates the weight
 		weight -= learningRate*(np.multiply(mh,1/(d*np.sqrt(vh) + epsilon)) + regularization*weight)
 
-
+		# Computes the error on the training and testing sets
 		if (i % testTime == 0):
 			print("Iteration : {} / {}".format(i+1, maxIter))
 			print("\t-> Train Loss : {}".format(loss))
@@ -251,7 +286,6 @@ def eveGradientDescent(train, trainLabels, test, testLabels,
 			print("\t-> Test Loss : {}".format(loss))
 
 	return weight, lossesTrain, lossesTest
-
 
 def adamBatchGradientDescent(train, trainLabels, test, testLabels,
 	maxIter = 10, learningRate = 0.001, regularization = 0.01,
@@ -267,8 +301,10 @@ def adamBatchGradientDescent(train, trainLabels, test, testLabels,
 	lossesTrain = []
 	weight = np.zeros(len(train.columns))
 
+	# Moving averages
 	m = np.zeros(weight.shape)
 	v = np.zeros(weight.shape)
+	# To compute them
 	b1t = 1
 	b2t = 1
 
@@ -277,15 +313,18 @@ def adamBatchGradientDescent(train, trainLabels, test, testLabels,
 		b2t *= b2
 		fullGrad = np.zeros(weight.shape)
 
+		# Shuffles the data in order to improve the learning
 		if shuffled:
 			train, trainLabels = shuffle(train, trainLabels)
 
 		for batch in range(numberOfBatch):
 			grad = np.zeros(weight.shape)
 
+			# Computes the gradient on the batch
 			for j in range(batch*batchSize, (batch+1)*batchSize):
 				grad += logisticGrad(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
 
+			# Computes local moving averages
 			fullGrad += grad
 			mlocal = b1*m / numberOfBatch + (1-b1)*grad
 			mh = mlocal / (1-b1t)
@@ -296,9 +335,11 @@ def adamBatchGradientDescent(train, trainLabels, test, testLabels,
 
 			weight -= learningRate*(np.multiply(mh,1/(np.sqrt(vh) + epsilon)) + regularization*weight/numberOfBatch)
 
+		# Updates the moving average with the full gradient
 		m = b1*m + (1-b1)*fullGrad
 		v = b2*v + (1-b2)*np.multiply(fullGrad,fullGrad)
 
+		# Computes the error on the training and testing sets
 		if (i % testTime == 0):
 			print("Iteration : {} / {}".format(i+1, maxIter))
 			loss = 0
@@ -342,16 +383,20 @@ def eveBatchGradientDescent(train, trainLabels, test, testLabels,
 		loss = 0
 		fullGrad = np.zeros(weight.shape)
 
+		# Shuffles the data in order to improve the learning
 		if shuffled:
 			train, trainLabels = shuffle(train, trainLabels)
 
+		# Computes error on full training set
 		for batch in range(numberOfBatch):
 			grad = np.zeros(weight.shape)
 
+			# Computes the gradient on a batch
 			for j in range(batch*batchSize, (batch+1)*batchSize):
 				grad += logisticGrad(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
 				loss += logisticLoss(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
 
+			# Computes a sub approximation of the moving averages
 			fullGrad += grad
 			mlocal = b1*m / numberOfBatch + (1-b1)*grad
 			mh = mlocal / (1-b1t)
@@ -360,11 +405,14 @@ def eveBatchGradientDescent(train, trainLabels, test, testLabels,
 			vlocal = b2*v + (1-b2)*square
 			vh = vlocal/(1-b2t)
 
+			# Updates weight
 			weight -= learningRate*(np.multiply(mh,1/(np.sqrt(vh) + epsilon)) + regularization*weight/numberOfBatch)
 
+		# Updates the moving average with the real moving average
 		m = b1*m + (1-b1)*fullGrad
 		v = b2*v + (1-b2)*np.multiply(fullGrad,fullGrad)
 
+		# Updates the learning rate (see Eve explanation)
 		if (i > 0):
 			if loss < oldLoss:
 				delta = k + 1
@@ -380,6 +428,7 @@ def eveBatchGradientDescent(train, trainLabels, test, testLabels,
 		else:
 			oldLoss = loss
 
+		# Computes the error on the training and testing sets
 		if (i % testTime == 0):
 			print("Iteration : {} / {}".format(i+1, maxIter))
 			loss = 0
