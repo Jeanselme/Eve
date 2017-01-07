@@ -314,3 +314,84 @@ def adamBatchGradientDescent(train, trainLabels, test, testLabels,
 			print("\t-> Test Loss : {}".format(loss))
 
 	return weight, lossesTrain, lossesTest
+
+def eveBatchGradientDescent(train, trainLabels, test, testLabels,
+	maxIter = 10, learningRate = 0.001, regularization = 0.01,
+	batchSizePercentage = 0.1, shuffled = True, testTime = 2,
+	b1 = 0.9, b2 = 0.999, b3 = 0.999, epsilon = 10**(-8), k = 0.1, K = 10):
+	"""
+	Computes the gradient descent in order to predict labels thanks to the eve algorithm
+	-> Binary classification
+	"""
+	batchSize = int(len(train)*batchSizePercentage)
+	numberOfBatch = int(len(train)/batchSize)
+	lossesTest = []
+	lossesTrain = []
+	weight = np.zeros(len(train.columns))
+
+	m = np.zeros(weight.shape)
+	v = np.zeros(weight.shape)
+	d = 1
+	oldLoss = 0
+	b1t = 1
+	b2t = 1
+
+	for i in range(maxIter):
+		b1t *= b1
+		b2t *= b2
+		loss = 0
+		fullGrad = np.zeros(weight.shape)
+
+		if shuffled:
+			train, trainLabels = shuffle(train, trainLabels)
+
+		for batch in range(numberOfBatch):
+			grad = np.zeros(weight.shape)
+
+			for j in range(batch*batchSize, (batch+1)*batchSize):
+				grad += logisticGrad(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
+				loss += logisticLoss(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
+
+			fullGrad += grad
+			mlocal = b1*m / numberOfBatch + (1-b1)*grad
+			mh = mlocal / (1-b1t)
+
+			square = np.multiply(grad,grad)
+			vlocal = b2*v + (1-b2)*square
+			vh = vlocal/(1-b2t)
+
+			weight -= learningRate*(np.multiply(mh,1/(np.sqrt(vh) + epsilon)) + regularization*weight/numberOfBatch)
+
+		m = b1*m + (1-b1)*fullGrad
+		v = b2*v + (1-b2)*np.multiply(fullGrad,fullGrad)
+
+		if (i > 0):
+			if loss < oldLoss:
+				delta = k + 1
+				Delta = K + 1
+			else:
+				delta = 1/(K+1)
+				Delta = 1/(k+1)
+			c = min(max(delta, loss/oldLoss), Delta)
+			oldLossS = oldLoss
+			oldLoss = c*oldLoss
+			r = abs(oldLoss - oldLossS)/(min(oldLoss,oldLossS))
+			d = b3*d + (1-b3)*r
+		else:
+			oldLoss = loss
+
+		if (i % testTime == 0):
+			print("Iteration : {} / {}".format(i+1, maxIter))
+			loss = 0
+			for j in range(len(train)):
+				loss += logisticLoss(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
+			lossesTrain.append(loss)
+			print("\t-> Train Loss : {}".format(loss))
+
+			loss = 0
+			for j in range(len(test)):
+				loss += logisticLoss(test.iloc[j], testLabels.iloc[j], weight)/len(test)
+			lossesTest.append(loss)
+			print("\t-> Test Loss : {}".format(loss))
+
+	return weight, lossesTrain, lossesTest
