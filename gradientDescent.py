@@ -99,6 +99,7 @@ def batchGradientDescent(train, trainLabels, test, testLabels,
 	-> Binary classification by logistic regression
 	"""
 	batchSize = int(len(train)*batchSizePercentage)
+	numberOfBatch = int(len(train)/batchSize)
 	lossesTest = []
 	lossesTrain = []
 	weight = np.zeros(len(train.columns))
@@ -109,11 +110,11 @@ def batchGradientDescent(train, trainLabels, test, testLabels,
 		if shuffled:
 			train, trainLabels = shuffle(train, trainLabels)
 
-		for batch in range(int(len(train)/batchSize)):
+		for batch in range(numberOfBatch):
 			for j in range(batch*batchSize, (batch+1)*batchSize):
 				grad += logisticGrad(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
 
-			weight -= learningRate*(grad + regularization*weight/batchSize)
+			weight -= learningRate*(grad + regularization*weight/numberOfBatch)
 
 		if (i % testTime == 0):
 			print("Iteration : {} / {}".format(i+1, maxIter))
@@ -151,7 +152,6 @@ def adamGradientDescent(train, trainLabels, test, testLabels,
 	for i in range(maxIter):
 		b1t *= b1
 		b2t *= b2
-		loss = 0
 		grad = np.zeros(weight.shape)
 
 		if shuffled:
