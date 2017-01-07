@@ -6,6 +6,7 @@ import gradientDescent as gd
 
 MAXITER = 1000
 LRATE = 0.01
+REG = 1
 TTIME = 50
 SHUFFLED = True
 
@@ -15,15 +16,19 @@ train, trainLabels, test, testLabels = de.ionosphere(0.1)
 
 print("TESTS : {} iterations, learning rate {}".format(MAXITER, LRATE))
 print("GRADIENT DESCENT")
-weight, trainG, testG = gd.gradientDescent(train, trainLabels, test, testLabels, maxIter = MAXITER, learningRate = LRATE, testTime = TTIME, shuffled = SHUFFLED)
+weight, trainG, testG = gd.gradientDescent(train, trainLabels, test, testLabels, maxIter = MAXITER, learningRate = LRATE, testTime = TTIME, shuffled = SHUFFLED, regularization = REG)
 print("STOCHASTIC GRADIENT DESCENT")
-weight, trainS, testS = gd.stochasticGradientDescent(train, trainLabels, test, testLabels, maxIter = MAXITER, learningRate = LRATE, testTime = TTIME)
+weight, trainS, testS = gd.stochasticGradientDescent(train, trainLabels, test, testLabels, maxIter = MAXITER, learningRate = LRATE, testTime = TTIME, regularization = REG)
 print("BATCH GRADIENT DESCENT")
-weight, trainB, testB = gd.batchGradientDescent(train, trainLabels, test, testLabels, maxIter = MAXITER, learningRate = LRATE, testTime = TTIME, shuffled = SHUFFLED)
+weight, trainB, testB = gd.batchGradientDescent(train, trainLabels, test, testLabels, maxIter = MAXITER, learningRate = LRATE, testTime = TTIME, shuffled = SHUFFLED, regularization = REG)
 print("ADAM GRADIENT DESCENT")
-weight, trainA, testA = gd.adamGradientDescent(train, trainLabels, test, testLabels, maxIter = MAXITER, learningRate = LRATE, testTime = TTIME, shuffled = SHUFFLED)
+weight, trainA, testA = gd.adamGradientDescent(train, trainLabels, test, testLabels, maxIter = MAXITER, learningRate = LRATE, testTime = TTIME, shuffled = SHUFFLED, regularization = REG)
 print("EVE GRADIENT DESCENT")
-weight, trainE, testE = gd.eveGradientDescent(train, trainLabels, test, testLabels, maxIter = MAXITER, learningRate = LRATE, testTime = TTIME, shuffled = SHUFFLED)
+weight, trainE, testE = gd.eveGradientDescent(train, trainLabels, test, testLabels, maxIter = MAXITER, learningRate = LRATE, testTime = TTIME, shuffled = SHUFFLED, regularization = REG)
+print("ADAM BATCH GRADIENT DESCENT")
+weight, trainBA, testBA = gd.adamBatchGradientDescent(train, trainLabels, test, testLabels, maxIter = MAXITER, learningRate = LRATE, testTime = TTIME, shuffled = SHUFFLED, regularization = REG)
+print("EVE BATCH GRADIENT DESCENT")
+weight, trainBE, testBE = gd.eveBatchGradientDescent(train, trainLabels, test, testLabels, maxIter = MAXITER, learningRate = LRATE, testTime = TTIME, shuffled = SHUFFLED, regularization = REG)
 
 plt.figure(1)
 
@@ -34,6 +39,8 @@ plt.plot(ttime, trainS, color="red", linewidth=1.0, linestyle="-", label="SGD")
 plt.plot(ttime, trainB, color="yellow", linewidth=1.0, linestyle="-", label="BGD")
 plt.plot(ttime, trainA, color="black", linewidth=1.0, linestyle="-", label="Adam")
 plt.plot(ttime, trainE, color="green", linewidth=1.0, linestyle="-", label="Eve")
+plt.plot(ttime, trainBA, color="purple", linewidth=1.0, linestyle="-", label="Adam Batch")
+plt.plot(ttime, trainBE, color="orange", linewidth=1.0, linestyle="-", label="Eve Batch")
 plt.xlim(0, MAXITER)
 plt.xlabel('Number of iterations')
 plt.ylabel('Error')
@@ -46,6 +53,8 @@ plt.plot(ttime, testS, color="red", linewidth=1.0, linestyle="-", label="SGD")
 plt.plot(ttime, testB, color="yellow", linewidth=1.0, linestyle="-", label="BGD")
 plt.plot(ttime, testA, color="black", linewidth=1.0, linestyle="-", label="Adam")
 plt.plot(ttime, testE, color="green", linewidth=1.0, linestyle="-", label="Eve")
+plt.plot(ttime, testBA, color="purple", linewidth=1.0, linestyle="-", label="Adam Batch")
+plt.plot(ttime, testBE, color="orange", linewidth=1.0, linestyle="-", label="Eve Batch")
 plt.xlim(0, MAXITER)
 plt.xlabel('Number of iterations')
 plt.ylabel('Error')
