@@ -398,7 +398,7 @@ def eveBatchGradientDescent(train, trainLabels, test, testLabels,
 
 			# Computes a sub approximation of the moving averages
 			fullGrad += grad
-			mlocal = b1*m + (1-b1)*grad
+			mlocal = b1*m / numberOfBatch + (1-b1)*grad
 			mh = mlocal / (1-b1t)
 
 			square = np.multiply(grad,grad)
@@ -406,7 +406,7 @@ def eveBatchGradientDescent(train, trainLabels, test, testLabels,
 			vh = vlocal/(1-b2t)
 
 			# Updates weight
-			weight -= learningRate*(np.multiply(mh,1/(np.sqrt(vh) + epsilon)) + regularization*weight)/numberOfBatch
+			weight -= learningRate*(np.multiply(mh,1/(np.sqrt(vh) + epsilon)) + regularization*weight/numberOfBatch)
 
 		# Updates the moving average with the real moving average
 		m = b1*m + (1-b1)*fullGrad
