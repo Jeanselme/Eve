@@ -7,7 +7,7 @@ import gradientDescent as gd
 MAXITER = 1000
 LRATE = 0.01
 REG = 1
-TTIME = 50
+TTIME = 10
 SHUFFLED = True
 
 ttime = range(0, MAXITER, TTIME)
