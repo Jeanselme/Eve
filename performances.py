@@ -6,13 +6,13 @@ import gradientDescent as gd
 
 MAXITER = 1000
 LRATE = 0.01
-REG = 1
+REG = 0.001
 TTIME = 10
 SHUFFLED = True
 
 ttime = range(0, MAXITER, TTIME)
 
-train, trainLabels, test, testLabels = de.ionosphere(0.1)
+train, trainLabels, test, testLabels = de.ionosphere(0.2)
 
 print("TESTS : {} iterations, learning rate {}".format(MAXITER, LRATE))
 print("GRADIENT DESCENT")
@@ -36,11 +36,12 @@ plt.figure(1)
 plt.subplot(211)
 plt.plot(ttime, trainG, color="blue", linewidth=1.0, linestyle="-", label="GD")
 plt.plot(ttime, trainS, color="red", linewidth=1.0, linestyle="-", label="SGD")
-plt.plot(ttime, trainB, color="yellow", linewidth=1.0, linestyle="-", label="BGD")
+plt.plot(ttime, trainB, color="yellow", linewidth=1.0, linestyle="--", label="BGD")
 plt.plot(ttime, trainA, color="black", linewidth=1.0, linestyle="-", label="Adam")
 plt.plot(ttime, trainE, color="green", linewidth=1.0, linestyle="-", label="Eve")
-plt.plot(ttime, trainBA, color="purple", linewidth=1.0, linestyle="-", label="Adam Batch")
-plt.plot(ttime, trainBE, color="orange", linewidth=1.0, linestyle="-", label="Eve Batch")
+plt.plot(ttime, trainBA, color="magenta", linewidth=1.0, linestyle="--", label="AdamB")
+plt.plot(ttime, trainBE, color="black", linewidth=1.0, linestyle="--", label="EveB")
+
 plt.xlim(0, MAXITER)
 plt.xlabel('Number of iterations')
 plt.ylabel('Error')
@@ -50,11 +51,12 @@ plt.title('Training error')
 plt.subplot(212)
 plt.plot(ttime, testG, color="blue", linewidth=1.0, linestyle="-", label="GD")
 plt.plot(ttime, testS, color="red", linewidth=1.0, linestyle="-", label="SGD")
-plt.plot(ttime, testB, color="yellow", linewidth=1.0, linestyle="-", label="BGD")
+plt.plot(ttime, testB, color="yellow", linewidth=1.0, linestyle="--", label="BGD")
 plt.plot(ttime, testA, color="black", linewidth=1.0, linestyle="-", label="Adam")
 plt.plot(ttime, testE, color="green", linewidth=1.0, linestyle="-", label="Eve")
-plt.plot(ttime, testBA, color="purple", linewidth=1.0, linestyle="-", label="Adam Batch")
-plt.plot(ttime, testBE, color="orange", linewidth=1.0, linestyle="-", label="Eve Batch")
+plt.plot(ttime, testBA, color="magenta", linewidth=1.0, linestyle="--", label="AdamB")
+plt.plot(ttime, testBE, color="black", linewidth=1.0, linestyle="--", label="EveB")
+
 plt.xlim(0, MAXITER)
 plt.xlabel('Number of iterations')
 plt.ylabel('Error')

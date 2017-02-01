@@ -168,8 +168,12 @@ def adamGradientDescent(train, trainLabels, test, testLabels,
 	b2t = 1
 
 	for i in range(maxIter):
-		b1t *= b1
-		b2t *= b2
+		if i < 1000:
+			b1t *= b1
+			b2t *= b2
+		else:
+			b1t = 0
+			b2t = 0
 		grad = np.zeros(weight.shape)
 
 		# Shuffles the data in order to improve the learning
@@ -231,8 +235,12 @@ def eveGradientDescent(train, trainLabels, test, testLabels,
 	oldLoss = 0
 
 	for i in range(maxIter):
-		b1t *= b1
-		b2t *= b2
+		if i < 1000:
+			b1t *= b1
+			b2t *= b2
+		else:
+			b1t = 0
+			b2t = 0
 		loss = 0
 		grad = np.zeros(weight.shape)
 
@@ -255,7 +263,7 @@ def eveGradientDescent(train, trainLabels, test, testLabels,
 		# Updates the adaptative learning rate
 		if (i > 0):
 			# In order to bound the learning rate
-			if loss < oldLoss:
+			if loss >= oldLoss:
 				delta = k + 1
 				Delta = K + 1
 			else:
@@ -309,15 +317,17 @@ def adamBatchGradientDescent(train, trainLabels, test, testLabels,
 	b2t = 1
 
 	for i in range(maxIter):
-		b1t *= b1
-		b2t *= b2
-		fullGrad = np.zeros(weight.shape)
-
 		# Shuffles the data in order to improve the learning
 		if shuffled:
 			train, trainLabels = shuffle(train, trainLabels)
 
 		for batch in range(numberOfBatch):
+			if i*batch < 1000:
+				b1t *= b1
+				b2t *= b2
+			else:
+				b1t = 0
+				b2t = 0
 			grad = np.zeros(weight.shape)
 
 			# Computes the gradient on the batch
@@ -325,19 +335,13 @@ def adamBatchGradientDescent(train, trainLabels, test, testLabels,
 				grad += logisticGrad(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
 
 			# Computes local moving averages
-			fullGrad += grad
-			mlocal = b1*m / numberOfBatch + (1-b1)*grad
-			mh = mlocal / (1-b1t)
+			m = b1*m + (1-b1)*grad
+			mh = m / (1-b1t)
 
-			square = np.multiply(grad,grad)
-			vlocal = b2*v + (1-b2)*square
-			vh = vlocal/(1-b2t)
+			v = b2*v + (1-b2)*np.multiply(grad,grad)
+			vh = v/(1-b2t)
 
 			weight -= learningRate*(np.multiply(mh,1/(np.sqrt(vh) + epsilon)) + regularization*weight/numberOfBatch)
-
-		# Updates the moving average with the full gradient
-		m = b1*m + (1-b1)*fullGrad
-		v = b2*v + (1-b2)*np.multiply(fullGrad,fullGrad)
 
 		# Computes the error on the training and testing sets
 		if (i % testTime == 0):
@@ -378,17 +382,19 @@ def eveBatchGradientDescent(train, trainLabels, test, testLabels,
 	b2t = 1
 
 	for i in range(maxIter):
-		b1t *= b1
-		b2t *= b2
-		loss = 0
-		fullGrad = np.zeros(weight.shape)
-
 		# Shuffles the data in order to improve the learning
 		if shuffled:
 			train, trainLabels = shuffle(train, trainLabels)
 
 		# Computes error on full training set
 		for batch in range(numberOfBatch):
+			if i*batch < 1000:
+				b1t *= b1
+				b2t *= b2
+			else:
+				b1t = 0
+				b2t = 0
+			loss = 0
 			grad = np.zeros(weight.shape)
 
 			# Computes the gradient on a batch
@@ -397,36 +403,30 @@ def eveBatchGradientDescent(train, trainLabels, test, testLabels,
 				loss += logisticLoss(train.iloc[j], trainLabels.iloc[j], weight)/len(train)
 
 			# Computes a sub approximation of the moving averages
-			fullGrad += grad
-			mlocal = b1*m / numberOfBatch + (1-b1)*grad
-			mh = mlocal / (1-b1t)
+			m = b1*m + (1-b1)*grad
+			mh = m / (1-b1t)
 
-			square = np.multiply(grad,grad)
-			vlocal = b2*v + (1-b2)*square
-			vh = vlocal/(1-b2t)
+			v = b2*v + (1-b2)*np.multiply(grad,grad)
+			vh = v/(1-b2t)
+
+			# Updates the learning rate (see Eve explanation)
+			if (i + batch > 0):
+				if loss >= oldLoss:
+					delta = k + 1
+					Delta = K + 1
+				else:
+					delta = 1/(K+1)
+					Delta = 1/(k+1)
+				c = min(max(delta, loss/oldLoss), Delta)
+				oldLossS = oldLoss
+				oldLoss = c*oldLoss
+				r = abs(oldLoss - oldLossS)/(min(oldLoss,oldLossS))
+				d = b3*d + (1-b3)*r
+			else:
+				oldLoss = loss
 
 			# Updates weight
 			weight -= learningRate*(np.multiply(mh,1/(np.sqrt(vh) + epsilon)) + regularization*weight/numberOfBatch)
-
-		# Updates the moving average with the real moving average
-		m = b1*m + (1-b1)*fullGrad
-		v = b2*v + (1-b2)*np.multiply(fullGrad,fullGrad)
-
-		# Updates the learning rate (see Eve explanation)
-		if (i > 0):
-			if loss < oldLoss:
-				delta = k + 1
-				Delta = K + 1
-			else:
-				delta = 1/(K+1)
-				Delta = 1/(k+1)
-			c = min(max(delta, loss/oldLoss), Delta)
-			oldLossS = oldLoss
-			oldLoss = c*oldLoss
-			r = abs(oldLoss - oldLossS)/(min(oldLoss,oldLossS))
-			d = b3*d + (1-b3)*r
-		else:
-			oldLoss = loss
 
 		# Computes the error on the training and testing sets
 		if (i % testTime == 0):
